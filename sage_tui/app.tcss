@@ -1,0 +1,172 @@
+/* -- HistoryInput -- */
+HistoryInput {
+    height: auto;
+    max-height: 8;
+}
+
+/* -- UserEntry -- */
+UserEntry {
+    height: auto;
+    padding: 0 1;
+    margin-bottom: 1;
+}
+
+/* -- ThinkingEntry -- */
+ThinkingEntry {
+    height: 1;
+    padding: 0 1;
+    margin-bottom: 1;
+}
+
+/* -- ToolEntry -- */
+ToolEntry {
+    height: auto;
+    padding: 0 1;
+    margin-bottom: 1;
+}
+ToolEntry Collapsible {
+    height: auto;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* -- AssistantEntry -- */
+AssistantEntry {
+    height: auto;
+    padding: 0 1;
+    margin-bottom: 1;
+}
+AssistantEntry .assistant-label {
+    color: $success;
+    text-style: bold;
+    height: 1;
+}
+AssistantEntry Markdown {
+    height: auto;
+    padding: 0;
+    margin: 0;
+}
+
+/* -- ChatPanel -- */
+ChatPanel {
+    width: 1fr;
+    height: 100%;
+    border-right: solid $primary;
+}
+ChatPanel #chat-label {
+    padding: 0 1;
+    color: $text-muted;
+    text-style: bold;
+    height: 1;
+}
+ChatPanel #chat-scroll {
+    height: 1fr;
+    scrollbar-size-vertical: 1;
+}
+ChatPanel HistoryInput {
+    dock: bottom;
+    margin: 0 1 1 1;
+}
+
+/* -- StatusPanel -- */
+StatusPanel {
+    width: 40;
+    height: 100%;
+    overflow-y: auto;
+    padding: 1;
+    display: none;
+}
+StatusPanel .section {
+    height: auto;
+    margin-bottom: 1;
+    padding-bottom: 1;
+    border-bottom: solid $primary-darken-3;
+}
+
+/* -- LogPanel -- */
+LogPanel {
+    dock: bottom;
+    height: 10;
+    border-top: solid $primary-darken-2;
+    display: none;
+}
+LogPanel #log-label {
+    padding: 0 1;
+    color: $text-muted;
+    text-style: bold;
+    height: 1;
+}
+LogPanel #log-output {
+    height: 1fr;
+}
+
+/* -- StatusBar -- */
+StatusBar {
+    dock: bottom;
+    height: 1;
+    background: $surface;
+    padding: 0 1;
+}
+
+/* -- PermissionScreen -- */
+PermissionScreen {
+    align: center middle;
+}
+#perm-body {
+    width: 72;
+    height: auto;
+    max-height: 60%;
+    background: $surface;
+    border: double $warning;
+    padding: 1 2;
+}
+#perm-title {
+    text-style: bold;
+    margin-bottom: 1;
+}
+#perm-detail {
+    margin-bottom: 1;
+}
+#perm-buttons {
+    height: 3;
+    align: right middle;
+}
+
+/* -- OrchestrationScreen -- */
+OrchestrationScreen {
+    align: center middle;
+}
+#modal-body {
+    width: 72;
+    height: auto;
+    max-height: 80%;
+    background: $surface;
+    border: double $primary;
+    padding: 1 2;
+}
+#modal-title {
+    text-style: bold;
+    margin-bottom: 1;
+}
+#agent-list {
+    height: auto;
+    margin-bottom: 1;
+}
+#orch-input {
+    margin-bottom: 1;
+}
+#orch-buttons {
+    height: 3;
+    align: right middle;
+}
+#orch-results {
+    height: auto;
+    max-height: 20;
+    overflow-y: auto;
+}
+
+/* -- SageTUIApp -- */
+#main-layout {
+    height: 1fr;
+}
