@@ -30,6 +30,9 @@ dev = [
 [project.scripts]
 sage-tui = "sage_tui.cli:main"
 
+[tool.uv.sources]
+sage-agent = { path = "../sage-agent", editable = true }
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
