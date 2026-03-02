@@ -305,6 +305,12 @@ class ChatPanel(Widget):
 class StatusPanel(Widget):
     """Right panel: session info, context, tokens, agent info, skills, active agents."""
 
+    DEFAULT_CSS = """
+    StatusPanel {
+        display: none;
+    }
+    """
+
     def __init__(self, **kwargs: object) -> None:
         super().__init__(**kwargs)  # type: ignore[arg-type]
         self._session_id: str = ""
@@ -422,6 +428,12 @@ class StatusPanel(Widget):
 
 class LogPanel(Widget):
     """Docked-bottom log viewer, hidden by default. Toggle with ctrl+l."""
+
+    DEFAULT_CSS = """
+    LogPanel {
+        display: none;
+    }
+    """
 
     _MAX_BUFFER = 500
 

@@ -181,7 +181,6 @@ class SageTUIApp(App[None]):
         chat.append_user_message(query)
         chat.start_turn()
 
-        agent = self._agent
         self._pending_tools.clear()
         self._current_response = None
         self._had_tool_calls_in_turn = False
