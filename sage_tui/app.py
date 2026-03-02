@@ -300,7 +300,9 @@ class SageTUIApp(App[None]):
     def action_toggle_stream(self) -> None:
         self._streaming_mode = not self._streaming_mode
         mode_label = "streaming" if self._streaming_mode else "batch"
-        self.query_one(ChatPanel).append_user_message(f"[dim]\u2699 Switched to {mode_label} mode[/dim]")
+        self.query_one(ChatPanel).append_user_message(
+            f"[dim]\u2699 Switched to {mode_label} mode[/dim]"
+        )
         self._set_status("Ready")
 
     # -- Private helpers -------------------------------------------------------

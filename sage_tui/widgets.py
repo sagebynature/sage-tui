@@ -232,7 +232,8 @@ class ChatPanel(Widget):
         yield Label("CHAT", id="chat-label")
         yield ChatScroll(id="chat-scroll")
         yield HistoryInput(
-            placeholder="> Type a message\u2026 Enter to send, Shift+Enter for newline", id="chat-input"
+            placeholder="> Type a message\u2026 Enter to send, Shift+Enter for newline",
+            id="chat-input",
         )
 
     # -- Scroll-pin logic ------------------------------------------------------
@@ -514,7 +515,9 @@ class StatusBar(Static):
             "Error": "red",
         }.get(self._state, "white")
         hint = "  [dim]ctrl+o: orchestrate[/dim]" if self._has_subagents else ""
-        stream_badge = " [cyan]\u25c9 stream[/cyan]" if self._streaming_mode else " [dim]\u25cb batch[/dim]"
+        stream_badge = (
+            " [cyan]\u25c9 stream[/cyan]" if self._streaming_mode else " [dim]\u25cb batch[/dim]"
+        )
 
         # Token usage display
         token_str = f"{format_tokens(self._token_usage)} tokens"

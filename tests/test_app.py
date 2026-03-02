@@ -494,7 +494,9 @@ async def test_app_has_session_id_on_mount(config_path: Path, mock_agent: MagicM
             await pilot.press("ctrl+q")
 
 
-async def test_generate_session_title_calls_provider(config_path: Path, mock_agent: MagicMock) -> None:
+async def test_generate_session_title_calls_provider(
+    config_path: Path, mock_agent: MagicMock
+) -> None:
     from sage_tui.app import SageTUIApp
     from sage.models import CompletionResult, Message, Usage
 

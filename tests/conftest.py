@@ -31,9 +31,12 @@ def config_path(tmp_path: Path) -> Path:
 @pytest.fixture
 def widget_app():
     """Factory for single-widget test apps."""
+
     def _make(*widgets):
         class _App(App[None]):
             def compose(self) -> ComposeResult:
                 yield from widgets
+
         return _App()
+
     return _make

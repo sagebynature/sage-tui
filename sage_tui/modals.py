@@ -78,7 +78,9 @@ class OrchestrationScreen(ModalScreen[None]):
             yield Static("[bold]Orchestrate Subagents[/bold]", id="modal-title")
             with Vertical(id="agent-list"):
                 for a in agents:
-                    yield Static(f"  [green]\u2022[/green] [bold]{a.name}[/bold] ([dim]{a.model}[/dim])")
+                    yield Static(
+                        f"  [green]\u2022[/green] [bold]{a.name}[/bold] ([dim]{a.model}[/dim])"
+                    )
             yield Input(
                 placeholder="Enter query for all subagents\u2026",
                 id="orch-input",
@@ -128,7 +130,9 @@ class OrchestrationScreen(ModalScreen[None]):
             safe_id = f"orch-result-{result.agent_name}"
             widget = self.query_one(f"#{safe_id}", Static)
             if result.success:
-                preview = result.output[:80] + "\u2026" if len(result.output) > 80 else result.output
+                preview = (
+                    result.output[:80] + "\u2026" if len(result.output) > 80 else result.output
+                )
                 widget.update(f"[green]\u2713[/green] [bold]{result.agent_name}:[/bold] {preview}")
             else:
                 widget.update(
