@@ -90,45 +90,29 @@ async def test_history_up_on_empty_history_is_noop() -> None:
         assert inp.value == ""
 
 
-async def test_user_entry_renders_message() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield UserEntry("hello world")
-
-    app = _App()
+async def test_user_entry_renders_message(widget_app) -> None:
+    app = widget_app(UserEntry("hello world"))
     async with app.run_test():
         widget = app.query_one(UserEntry)
         assert widget is not None
 
 
-async def test_thinking_entry_is_mounted() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield ThinkingEntry()
-
-    app = _App()
+async def test_thinking_entry_is_mounted(widget_app) -> None:
+    app = widget_app(ThinkingEntry())
     async with app.run_test():
         widget = app.query_one(ThinkingEntry)
         assert widget is not None
 
 
-async def test_tool_entry_starts_collapsed() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield ToolEntry("bash", {"command": "ls"})
-
-    app = _App()
+async def test_tool_entry_starts_collapsed(widget_app) -> None:
+    app = widget_app(ToolEntry("bash", {"command": "ls"}))
     async with app.run_test():
         c = app.query_one(Collapsible)
         assert c.collapsed is True
 
 
-async def test_tool_entry_set_result_updates_widget() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield ToolEntry("bash", {"command": "ls"})
-
-    app = _App()
+async def test_tool_entry_set_result_updates_widget(widget_app) -> None:
+    app = widget_app(ToolEntry("bash", {"command": "ls"}))
     async with app.run_test():
         entry = app.query_one(ToolEntry)
         entry.set_result("file1\nfile2")
@@ -136,35 +120,23 @@ async def test_tool_entry_set_result_updates_widget() -> None:
         assert entry._error is False
 
 
-async def test_tool_entry_set_error_marks_error() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield ToolEntry("bash", {"command": "bad"})
-
-    app = _App()
+async def test_tool_entry_set_error_marks_error(widget_app) -> None:
+    app = widget_app(ToolEntry("bash", {"command": "bad"}))
     async with app.run_test():
         entry = app.query_one(ToolEntry)
         entry.set_result("command not found", error=True)
         assert entry._error is True
 
 
-async def test_assistant_entry_has_markdown_widget() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield AssistantEntry()
-
-    app = _App()
+async def test_assistant_entry_has_markdown_widget(widget_app) -> None:
+    app = widget_app(AssistantEntry())
     async with app.run_test():
         md = app.query_one(Markdown)
         assert md is not None
 
 
-async def test_assistant_entry_append_chunk() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield AssistantEntry()
-
-    app = _App()
+async def test_assistant_entry_append_chunk(widget_app) -> None:
+    app = widget_app(AssistantEntry())
     async with app.run_test() as pilot:
         entry = app.query_one(AssistantEntry)
         entry.append_chunk("hello ")
@@ -173,12 +145,8 @@ async def test_assistant_entry_append_chunk() -> None:
         assert "hello world" in entry._content
 
 
-async def test_assistant_entry_set_text() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield AssistantEntry()
-
-    app = _App()
+async def test_assistant_entry_set_text(widget_app) -> None:
+    app = widget_app(AssistantEntry())
     async with app.run_test() as pilot:
         entry = app.query_one(AssistantEntry)
         entry.set_text("full response here")
@@ -186,12 +154,8 @@ async def test_assistant_entry_set_text() -> None:
         assert "full response here" in entry._content
 
 
-async def test_chat_panel_append_user_message() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield ChatPanel(id="chat")
-
-    app = _App()
+async def test_chat_panel_append_user_message(widget_app) -> None:
+    app = widget_app(ChatPanel(id="chat"))
     async with app.run_test() as pilot:
         panel = app.query_one(ChatPanel)
         panel.append_user_message("test message")
@@ -199,12 +163,8 @@ async def test_chat_panel_append_user_message() -> None:
         assert len(app.query(UserEntry)) == 1
 
 
-async def test_chat_panel_start_and_finish_turn() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield ChatPanel(id="chat")
-
-    app = _App()
+async def test_chat_panel_start_and_finish_turn(widget_app) -> None:
+    app = widget_app(ChatPanel(id="chat"))
     async with app.run_test() as pilot:
         panel = app.query_one(ChatPanel)
         panel.start_turn()
@@ -216,12 +176,8 @@ async def test_chat_panel_start_and_finish_turn() -> None:
         assert len(app.query(AssistantEntry)) == 1
 
 
-async def test_chat_panel_add_tool_call() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield ChatPanel(id="chat")
-
-    app = _App()
+async def test_chat_panel_add_tool_call(widget_app) -> None:
+    app = widget_app(ChatPanel(id="chat"))
     async with app.run_test() as pilot:
         panel = app.query_one(ChatPanel)
         tool = panel.add_tool_call("bash", {"command": "ls"})
@@ -230,12 +186,8 @@ async def test_chat_panel_add_tool_call() -> None:
         assert len(app.query(ToolEntry)) == 1
 
 
-async def test_chat_panel_clear() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield ChatPanel(id="chat")
-
-    app = _App()
+async def test_chat_panel_clear(widget_app) -> None:
+    app = widget_app(ChatPanel(id="chat"))
     async with app.run_test() as pilot:
         panel = app.query_one(ChatPanel)
         panel.append_user_message("hi")
@@ -245,44 +197,22 @@ async def test_chat_panel_clear() -> None:
         assert len(app.query(UserEntry)) == 0
 
 
-def _make_mock_agent(
-    name: str = "test",
-    model: str = "gpt-4o",
-    skills: list | None = None,
-    subagents: dict | None = None,
-) -> MagicMock:
-    agent = MagicMock()
-    agent.name = name
-    agent.model = model
-    agent.skills = skills or []
-    agent.subagents = subagents or {}
-    return agent
-
-
-async def test_status_panel_initializes_without_crash() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield StatusPanel(id="status")
-
-    app = _App()
+async def test_status_panel_initializes_without_crash(widget_app, mock_agent) -> None:
+    app = widget_app(StatusPanel(id="status"))
     async with app.run_test():
         panel = app.query_one(StatusPanel)
         panel.display = True
         panel.set_session("abcd1234abcd1234abcd1234abcd1234", "")
-        panel.initialize(_make_mock_agent())
+        panel.initialize(mock_agent)
 
 
-async def test_status_panel_update_stats_without_crash() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield StatusPanel(id="status")
-
-    app = _App()
+async def test_status_panel_update_stats_without_crash(widget_app, mock_agent) -> None:
+    app = widget_app(StatusPanel(id="status"))
     async with app.run_test():
         panel = app.query_one(StatusPanel)
         panel.display = True
         panel.set_session("abcd1234abcd1234abcd1234abcd1234", "")
-        panel.initialize(_make_mock_agent())
+        panel.initialize(mock_agent)
         stats = {
             "token_usage": 5000,
             "context_window_limit": 100000,
@@ -297,38 +227,26 @@ async def test_status_panel_update_stats_without_crash() -> None:
         panel.update_stats(stats)
 
 
-async def test_status_panel_active_agents_delegation() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield StatusPanel(id="status")
-
-    app = _App()
+async def test_status_panel_active_agents_delegation(widget_app, mock_agent) -> None:
+    app = widget_app(StatusPanel(id="status"))
     async with app.run_test():
         panel = app.query_one(StatusPanel)
         panel.display = True
         panel.set_session("abcd1234abcd1234abcd1234abcd1234", "")
-        panel.initialize(_make_mock_agent())
+        panel.initialize(mock_agent)
         panel.set_active_delegation("coder", "write a function")
         panel.clear_active_delegation()
 
 
-async def test_log_panel_starts_hidden() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield LogPanel(id="logs")
-
-    app = _App()
+async def test_log_panel_starts_hidden(widget_app) -> None:
+    app = widget_app(LogPanel(id="logs"))
     async with app.run_test():
         panel = app.query_one(LogPanel)
         assert panel.display is False
 
 
-async def test_log_panel_toggle_shows_and_hides() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield LogPanel(id="logs")
-
-    app = _App()
+async def test_log_panel_toggle_shows_and_hides(widget_app) -> None:
+    app = widget_app(LogPanel(id="logs"))
     async with app.run_test():
         panel = app.query_one(LogPanel)
         panel.toggle_visibility()
@@ -511,56 +429,42 @@ def test_agent_reset_session_clears_usage() -> None:
 # ── StatusPanel session & toggle tests ─────────────────────────────────────────
 
 
-async def test_status_panel_has_session_section() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield StatusPanel(id="status")
-
-    app = _App()
+async def test_status_panel_has_session_section(widget_app, mock_agent) -> None:
+    app = widget_app(StatusPanel(id="status"))
     async with app.run_test():
         panel = app.query_one(StatusPanel)
         panel.display = True
         panel.set_session("abcd1234abcd1234abcd1234abcd1234", "")
-        panel.initialize(_make_mock_agent())
+        panel.initialize(mock_agent)
         session_widget = panel.query_one("#session-section", Static)
         assert session_widget is not None
 
 
-async def test_status_panel_update_session_title() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield StatusPanel(id="status")
-
-    app = _App()
+async def test_status_panel_update_session_title(widget_app, mock_agent) -> None:
+    app = widget_app(StatusPanel(id="status"))
     async with app.run_test():
         panel = app.query_one(StatusPanel)
         panel.display = True
         panel.set_session("abcd1234abcd1234abcd1234abcd1234", "")
-        panel.initialize(_make_mock_agent())
+        panel.initialize(mock_agent)
         panel.update_session_title("My Great Session")
         assert panel._session_title == "My Great Session"
 
 
-async def test_status_panel_hidden_by_default() -> None:
-    class _App(App[None]):
-        def compose(self) -> ComposeResult:
-            yield StatusPanel(id="status")
-
-    app = _App()
+async def test_status_panel_hidden_by_default(widget_app) -> None:
+    app = widget_app(StatusPanel(id="status"))
     async with app.run_test():
         panel = app.query_one(StatusPanel)
         assert panel.display is False
 
 
-async def test_ctrl_b_toggles_status_panel(tmp_path: Path) -> None:
+async def test_ctrl_b_toggles_status_panel(config_path: Path, mock_agent: MagicMock) -> None:
     from sage_tui.app import SageTUIApp
 
-    cfg = _make_config_path(tmp_path)
-    mock_agent = _make_mock_agent()
     mock_agent.close = AsyncMock()
 
     with patch("sage_tui.app.Agent.from_config", return_value=mock_agent):
-        app = SageTUIApp(config_path=cfg)
+        app = SageTUIApp(config_path=config_path)
         async with app.run_test() as pilot:
             panel = app.query_one(StatusPanel)
             assert panel.display is False  # hidden by default
@@ -571,27 +475,16 @@ async def test_ctrl_b_toggles_status_panel(tmp_path: Path) -> None:
             await pilot.press("ctrl+q")
 
 
-# ── Helper for integration tests ──────────────────────────────────────────────
-
-
-def _make_config_path(tmp_path: Path) -> Path:
-    cfg = tmp_path / "AGENTS.md"
-    cfg.write_text("---\nname: test-agent\nmodel: gpt-4o\n---\nA helpful assistant.\n")
-    return cfg
-
-
 # ── Session state & title generation tests ────────────────────────────────────
 
 
-async def test_app_has_session_id_on_mount(tmp_path: Path) -> None:
+async def test_app_has_session_id_on_mount(config_path: Path, mock_agent: MagicMock) -> None:
     from sage_tui.app import SageTUIApp
 
-    cfg = _make_config_path(tmp_path)
-    mock_agent = _make_mock_agent()
     mock_agent.close = AsyncMock()
 
     with patch("sage_tui.app.Agent.from_config", return_value=mock_agent):
-        app = SageTUIApp(config_path=cfg)
+        app = SageTUIApp(config_path=config_path)
         async with app.run_test() as pilot:
             assert hasattr(app, "_session_id")
             assert isinstance(app._session_id, str)
@@ -601,12 +494,10 @@ async def test_app_has_session_id_on_mount(tmp_path: Path) -> None:
             await pilot.press("ctrl+q")
 
 
-async def test_generate_session_title_calls_provider(tmp_path: Path) -> None:
+async def test_generate_session_title_calls_provider(config_path: Path, mock_agent: MagicMock) -> None:
     from sage_tui.app import SageTUIApp
     from sage.models import CompletionResult, Message, Usage
 
-    cfg = _make_config_path(tmp_path)
-    mock_agent = _make_mock_agent()
     mock_agent.close = AsyncMock()
     mock_agent.provider = AsyncMock()
     mock_agent.provider.complete = AsyncMock(
@@ -617,7 +508,7 @@ async def test_generate_session_title_calls_provider(tmp_path: Path) -> None:
     )
 
     with patch("sage_tui.app.Agent.from_config", return_value=mock_agent):
-        app = SageTUIApp(config_path=cfg)
+        app = SageTUIApp(config_path=config_path)
         async with app.run_test() as pilot:
             await app._generate_session_title("help me redesign the TUI")
             assert app._session_title == "Enhance TUI Design"
@@ -628,15 +519,13 @@ async def test_generate_session_title_calls_provider(tmp_path: Path) -> None:
 # ── Integration test ──────────────────────────────────────────────────────────
 
 
-async def test_sage_tui_app_mounts_and_quits(tmp_path: Path) -> None:
+async def test_sage_tui_app_mounts_and_quits(config_path: Path, mock_agent: MagicMock) -> None:
     from sage_tui.app import SageTUIApp
 
-    cfg = _make_config_path(tmp_path)
-    mock_agent = _make_mock_agent()
     mock_agent.close = AsyncMock()
 
     with patch("sage_tui.app.Agent.from_config", return_value=mock_agent):
-        app = SageTUIApp(config_path=cfg)
+        app = SageTUIApp(config_path=config_path)
         async with app.run_test() as pilot:
             assert app.query_one(ChatPanel) is not None
             assert app.query_one(StatusPanel) is not None
@@ -647,17 +536,15 @@ async def test_sage_tui_app_mounts_and_quits(tmp_path: Path) -> None:
         mock_agent.close.assert_awaited_once()
 
 
-async def test_clear_chat_resets_session(tmp_path: Path) -> None:
+async def test_clear_chat_resets_session(config_path: Path, mock_agent: MagicMock) -> None:
     from sage_tui.app import SageTUIApp
 
-    cfg = _make_config_path(tmp_path)
-    mock_agent = _make_mock_agent()
     mock_agent.close = AsyncMock()
     mock_agent.reset_session = MagicMock()
     mock_agent.get_usage_stats = MagicMock(return_value={})
 
     with patch("sage_tui.app.Agent.from_config", return_value=mock_agent):
-        app = SageTUIApp(config_path=cfg)
+        app = SageTUIApp(config_path=config_path)
         async with app.run_test() as pilot:
             old_session_id = app._session_id
             app._session_title = "Old Title"
