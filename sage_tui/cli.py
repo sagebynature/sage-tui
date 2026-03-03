@@ -10,6 +10,11 @@ from pathlib import Path
 import click
 from dotenv import load_dotenv
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sage.main_config import MainConfig
+
 
 def _setup_logging(verbose: bool = False) -> None:
     """Initialize basic logging."""
