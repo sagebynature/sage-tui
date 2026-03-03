@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from textual.app import App
 from textual.message import Message
@@ -69,7 +69,7 @@ def instrument_agent(agent: Agent, app: "SageTUIApp") -> None:
             BackgroundTaskDone(
                 task_id=e.task_id,
                 agent_name=e.agent_name,
-                status=e.status,
+                status=cast(Literal["completed", "failed", "cancelled"], e.status),
                 result=e.result,
                 error=e.error,
                 duration_s=duration_s,
