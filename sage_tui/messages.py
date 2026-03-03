@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from textual.message import Message
 
@@ -91,7 +91,7 @@ class BackgroundTaskDone(Message):
         self,
         task_id: str,
         agent_name: str,
-        status: str,
+        status: Literal["completed", "failed", "cancelled"],
         result: str | None,
         error: str | None,
         duration_s: float,
@@ -108,7 +108,7 @@ class BackgroundTaskDone(Message):
 class PlanStateChanged(Message):
     """Emitted when plan state on disk has been refreshed."""
 
-    def __init__(self, plan_name: str, tasks: list[dict]) -> None:
+    def __init__(self, plan_name: str, tasks: list[dict[str, Any]]) -> None:
         super().__init__()
         self.plan_name = plan_name
         self.tasks = tasks

@@ -1,3 +1,5 @@
+"""Tests for sage-tui custom Textual messages."""
+
 from sage_tui.messages import (
     BackgroundTaskDone,
     DelegationEventStarted,
