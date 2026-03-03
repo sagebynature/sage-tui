@@ -52,5 +52,13 @@ line-length = 100
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
-branch = "main"
-tag_format = "v{version}"
+major_on_zero = true
+upload_to_pypi = false
+
+[tool.semantic_release.branches.main]
+match = "main"
+
+[tool.semantic_release.branches.dev]
+match = "dev"
+prerelease = true
+prerelease_token = "rc"
