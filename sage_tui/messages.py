@@ -69,10 +69,11 @@ class TurnStarted(Message):
 class DelegationEventStarted(Message):
     """Emitted when the agent delegates to a subagent."""
 
-    def __init__(self, target: str, task: str) -> None:
+    def __init__(self, target: str, task: str, category: str | None = None) -> None:
         super().__init__()
         self.target = target
         self.task = task
+        self.category = category
 
 
 class SessionTitleGenerated(Message):
@@ -81,3 +82,42 @@ class SessionTitleGenerated(Message):
     def __init__(self, title: str) -> None:
         super().__init__()
         self.title = title
+
+
+class BackgroundTaskDone(Message):
+    """Emitted when a background task completes, fails, or is cancelled."""
+
+    def __init__(
+        self,
+        task_id: str,
+        agent_name: str,
+        status: str,
+        result: str | None,
+        error: str | None,
+        duration_s: float,
+    ) -> None:
+        super().__init__()
+        self.task_id = task_id
+        self.agent_name = agent_name
+        self.status = status
+        self.result = result
+        self.error = error
+        self.duration_s = duration_s
+
+
+class PlanStateChanged(Message):
+    """Emitted when plan state on disk has been refreshed."""
+
+    def __init__(self, plan_name: str, tasks: list[dict]) -> None:
+        super().__init__()
+        self.plan_name = plan_name
+        self.tasks = tasks
+
+
+class NotepadChanged(Message):
+    """Emitted when notepad content on disk has been refreshed."""
+
+    def __init__(self, plan_name: str, content: str) -> None:
+        super().__init__()
+        self.plan_name = plan_name
+        self.content = content
