@@ -623,9 +623,7 @@ class StatusBar(Static):
             " [cyan]\u25c9 stream[/cyan]" if self._streaming_mode else " [dim]\u25cb batch[/dim]"
         )
         cat_badge = (
-            f" [cyan dim][{self._active_category}][/cyan dim]"
-            if self._active_category
-            else ""
+            f" [cyan dim][{self._active_category}][/cyan dim]" if self._active_category else ""
         )
 
         # Token usage display

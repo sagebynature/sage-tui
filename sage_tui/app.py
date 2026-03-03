@@ -332,7 +332,7 @@ class SageTUIApp(App[None]):
     def _finish_turn(self) -> None:
         self.query_one(StatusPanel).clear_active_delegation()
         self.query_one(StatusBar).set_active_category(None)  # clear category badge
-        self._refresh_plan_notepad()                          # catch-all refresh
+        self._refresh_plan_notepad()  # catch-all refresh
         if self._agent:
             stats = self._agent.get_usage_stats()
             self.query_one(StatusPanel).update_stats(stats)
