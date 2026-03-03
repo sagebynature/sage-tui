@@ -21,6 +21,7 @@ from sage_tui.app import (
     TUILogHandler,
     UserEntry,
 )
+from sage_tui.widgets import BackgroundTaskEntry  # add to existing imports block
 
 
 class _HistoryApp(App[None]):
@@ -556,3 +557,36 @@ async def test_clear_chat_resets_session(config_path: Path, mock_agent: MagicMoc
             assert app._session_title == ""
             mock_agent.reset_session.assert_called_once()
             await pilot.press("ctrl+q")
+
+
+async def test_background_task_entry_completed_mounts(widget_app) -> None:
+    app = widget_app(BackgroundTaskEntry("executor", "completed", "all done", None, 1.8))
+    async with app.run_test():
+        widget = app.query_one(BackgroundTaskEntry)
+        assert widget is not None
+
+
+async def test_background_task_entry_failed_mounts(widget_app) -> None:
+    app = widget_app(BackgroundTaskEntry("worker", "failed", None, "timeout", 0.5))
+    async with app.run_test():
+        widget = app.query_one(BackgroundTaskEntry)
+        assert widget._status == "failed"
+        assert widget._error == "timeout"
+
+
+async def test_background_task_entry_result_truncated(widget_app) -> None:
+    long_result = "x" * 200
+    app = widget_app(BackgroundTaskEntry("agent", "completed", long_result, None, 0.1))
+    async with app.run_test():
+        widget = app.query_one(BackgroundTaskEntry)
+        assert widget._result is not None
+        assert len(widget._result) == 200  # stored full; rendering truncates
+
+
+async def test_chat_panel_add_background_task(widget_app) -> None:
+    app = widget_app(ChatPanel(id="chat"))
+    async with app.run_test() as pilot:
+        panel = app.query_one(ChatPanel)
+        panel.add_background_task("executor", "completed", "result text", None, 1.2)
+        await pilot.pause()
+        assert len(app.query(BackgroundTaskEntry)) == 1

@@ -31,6 +31,14 @@ ToolEntry Collapsible {
     margin: 0;
 }
 
+/* -- BackgroundTaskEntry -- */
+BackgroundTaskEntry {
+    height: auto;
+    padding: 0 1;
+    margin-bottom: 1;
+    border-left: solid $warning;
+}
+
 /* -- AssistantEntry -- */
 AssistantEntry {
     height: auto;

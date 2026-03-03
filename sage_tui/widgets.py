@@ -188,6 +188,47 @@ class ToolEntry(Widget):
         )
 
 
+class BackgroundTaskEntry(Widget):
+    """Inline card for a completed background task. Non-collapsible."""
+
+    def __init__(
+        self,
+        agent_name: str,
+        status: str,
+        result: str | None,
+        error: str | None,
+        duration_s: float,
+    ) -> None:
+        super().__init__()
+        self._agent_name = agent_name
+        self._status = status
+        self._result = result
+        self._error = error
+        self._duration_s = duration_s
+
+    def compose(self) -> ComposeResult:
+        status_colors = {"completed": "green", "failed": "red", "cancelled": "dim"}
+        color = status_colors.get(self._status, "dim")
+        dot = "\u25ce" if self._status == "cancelled" else "\u25cf"
+        duration = f"  [dim]{self._duration_s:.1f}s[/dim]"
+        header = (
+            f"[{color}]{dot}[/{color}]"
+            f" [bold]{self._agent_name}[/bold]"
+            f"  [{color}]{self._status}[/{color}]{duration}"
+        )
+        if self._status == "failed" and self._error:
+            preview = self._error[:120] + "\u2026" if len(self._error) > 120 else self._error
+            body = f"  [red]{preview}[/red]"
+        elif self._result:
+            preview = self._result[:120] + "\u2026" if len(self._result) > 120 else self._result
+            body = f"  [dim]{preview}[/dim]"
+        else:
+            body = ""
+        yield Static(header, id="bg-header")
+        if body:
+            yield Static(body, id="bg-body")
+
+
 class AssistantEntry(Widget):
     """Agent response rendered as Markdown with streaming support."""
 
@@ -290,6 +331,21 @@ class ChatPanel(Widget):
             thinking.first().remove()
         scroll = self.query_one("#chat-scroll", VerticalScroll)
         entry = AssistantEntry()
+        scroll.mount(entry)
+        self.call_after_refresh(self._maybe_scroll_end)
+        return entry
+
+    def add_background_task(
+        self,
+        agent_name: str,
+        status: str,
+        result: str | None,
+        error: str | None,
+        duration_s: float,
+    ) -> "BackgroundTaskEntry":
+        """Append a BackgroundTaskEntry card inline in the chat scroll."""
+        scroll = self.query_one("#chat-scroll", VerticalScroll)
+        entry = BackgroundTaskEntry(agent_name, status, result, error, duration_s)
         scroll.mount(entry)
         self.call_after_refresh(self._maybe_scroll_end)
         return entry
