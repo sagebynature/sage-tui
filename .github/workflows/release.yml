@@ -36,11 +36,12 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/sage-agent
+      url: https://pypi.org/p/sage-tui
     steps:
       - uses: actions/checkout@v4
         with:
           ref: v${{ needs.release.outputs.version }}
+          fetch-depth: 0
 
       - uses: astral-sh/setup-uv@v5
 
