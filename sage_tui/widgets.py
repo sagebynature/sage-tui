@@ -342,8 +342,8 @@ class ChatPanel(Widget):
         result: str | None,
         error: str | None,
         duration_s: float,
-    ) -> "BackgroundTaskEntry":
-        """Append a BackgroundTaskEntry card inline in the chat scroll."""
+    ) -> BackgroundTaskEntry:
+        """Append a BackgroundTaskEntry card inline in the chat scroll and return it."""
         scroll = self.query_one("#chat-scroll", VerticalScroll)
         entry = BackgroundTaskEntry(agent_name, status, result, error, duration_s)
         scroll.mount(entry)

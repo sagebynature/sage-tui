@@ -21,7 +21,7 @@ from sage_tui.app import (
     TUILogHandler,
     UserEntry,
 )
-from sage_tui.widgets import BackgroundTaskEntry  # add to existing imports block
+from sage_tui.widgets import BackgroundTaskEntry
 
 
 class _HistoryApp(App[None]):
@@ -574,7 +574,7 @@ async def test_background_task_entry_failed_mounts(widget_app) -> None:
         assert widget._error == "timeout"
 
 
-async def test_background_task_entry_result_truncated(widget_app) -> None:
+async def test_background_task_entry_stores_full_result(widget_app) -> None:
     long_result = "x" * 200
     app = widget_app(BackgroundTaskEntry("agent", "completed", long_result, None, 0.1))
     async with app.run_test():
