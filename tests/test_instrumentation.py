@@ -62,7 +62,8 @@ async def test_instrument_agent_wires_background_task_completed() -> None:
     assert msg.agent_name == "executor"
     assert msg.status == "completed"
     assert msg.result == "done"
-    assert msg.duration_s >= 0.0
+    assert 1.5 <= msg.duration_s <= 2.5
+    assert msg.task_id == "t1"
 
 
 @pytest.mark.asyncio
