@@ -54,6 +54,7 @@ line-length = 100
 version_toml = ["pyproject.toml:project.version"]
 major_on_zero = true
 upload_to_pypi = false
+commit_message = "{version}\n\n[skip ci]"
 
 [tool.semantic_release.branches.main]
 match = "main"
