@@ -667,3 +667,96 @@ async def test_status_bar_clears_category(widget_app) -> None:
         bar.set_active_category(None)
         await pilot.pause()
         assert bar._active_category is None
+
+
+async def test_app_background_task_done_adds_chat_entry(
+    config_path: Path, mock_agent: MagicMock
+) -> None:
+    from sage_tui.app import SageTUIApp
+    from sage_tui.messages import BackgroundTaskDone
+    from sage_tui.widgets import BackgroundTaskEntry
+
+    mock_agent.close = AsyncMock()
+
+    with patch("sage_tui.app.Agent.from_config", return_value=mock_agent):
+        app = SageTUIApp(config_path=config_path)
+        async with app.run_test() as pilot:
+            app.post_message(
+                BackgroundTaskDone(
+                    task_id="t1",
+                    agent_name="executor",
+                    status="completed",
+                    result="task done",
+                    error=None,
+                    duration_s=2.1,
+                )
+            )
+            await pilot.pause()
+            assert len(app.query(BackgroundTaskEntry)) == 1
+            await pilot.press("ctrl+q")
+
+
+async def test_app_delegation_with_category_updates_status_bar(
+    config_path: Path, mock_agent: MagicMock
+) -> None:
+    from sage_tui.app import SageTUIApp
+    from sage_tui.messages import DelegationEventStarted
+    from sage_tui.widgets import StatusBar
+
+    mock_agent.close = AsyncMock()
+
+    with patch("sage_tui.app.Agent.from_config", return_value=mock_agent):
+        app = SageTUIApp(config_path=config_path)
+        async with app.run_test() as pilot:
+            app.post_message(
+                DelegationEventStarted(target="coder", task="write tests", category="quick")
+            )
+            await pilot.pause()
+            bar = app.query_one(StatusBar)
+            assert bar._active_category == "quick"
+            await pilot.press("ctrl+q")
+
+
+async def test_app_plan_state_changed_updates_status_panel(
+    config_path: Path, mock_agent: MagicMock
+) -> None:
+    from textual.widgets import Static
+
+    from sage_tui.app import SageTUIApp
+    from sage_tui.messages import PlanStateChanged
+
+    mock_agent.close = AsyncMock()
+
+    with patch("sage_tui.app.Agent.from_config", return_value=mock_agent):
+        app = SageTUIApp(config_path=config_path)
+        async with app.run_test() as pilot:
+            app.post_message(
+                PlanStateChanged(
+                    plan_name="my-plan",
+                    tasks=[{"description": "Do X", "status": "pending"}],
+                )
+            )
+            await pilot.pause()
+            plan_widget = app.query_one("#plan-section", Static)
+            assert plan_widget.display is True
+            await pilot.press("ctrl+q")
+
+
+async def test_app_notepad_changed_updates_status_panel(
+    config_path: Path, mock_agent: MagicMock
+) -> None:
+    from textual.widgets import Collapsible
+
+    from sage_tui.app import SageTUIApp
+    from sage_tui.messages import NotepadChanged
+
+    mock_agent.close = AsyncMock()
+
+    with patch("sage_tui.app.Agent.from_config", return_value=mock_agent):
+        app = SageTUIApp(config_path=config_path)
+        async with app.run_test() as pilot:
+            app.post_message(NotepadChanged(plan_name="my-plan", content="### learnings\nX"))
+            await pilot.pause()
+            collapsible = app.query_one("#notepad-collapsible", Collapsible)
+            assert collapsible is not None
+            await pilot.press("ctrl+q")

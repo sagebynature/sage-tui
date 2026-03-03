@@ -40,7 +40,10 @@ from sage_tui.instrumentation import (
 from sage_tui.messages import (
     AgentError,
     AgentResponseReady,
+    BackgroundTaskDone,
     DelegationEventStarted,
+    NotepadChanged,
+    PlanStateChanged,
     SessionTitleGenerated,
     StreamChunkReceived,
     StreamFinished,
@@ -51,6 +54,7 @@ from sage_tui.messages import (
 from sage_tui.modals import OrchestrationScreen, PermissionScreen
 from sage_tui.widgets import (
     AssistantEntry,
+    BackgroundTaskEntry,
     ChatPanel,
     HistoryInput,
     LogPanel,
@@ -230,12 +234,18 @@ class SageTUIApp(App[None]):
         if queue:
             entry = queue.pop(0)
             entry.set_result(event.result)
+        if event.tool_name.startswith(("plan_", "notepad_")):
+            self._refresh_plan_notepad()
 
     def on_turn_started(self, event: TurnStarted) -> None:
         self._set_status("Streaming\u2026" if self._streaming_mode else "Thinking\u2026")
 
     def on_delegation_event_started(self, event: DelegationEventStarted) -> None:
-        self.query_one(StatusPanel).set_active_delegation(event.target, event.task)
+        self.query_one(StatusPanel).set_active_delegation(
+            event.target, event.task, category=event.category
+        )
+        if event.category:
+            self.query_one(StatusBar).set_active_category(event.category)
 
     def on_stream_chunk_received(self, event: StreamChunkReceived) -> None:
         chat = self.query_one(ChatPanel)
@@ -266,8 +276,19 @@ class SageTUIApp(App[None]):
         self._set_status("Error")
         self._re_enable_input()
 
+    def on_background_task_done(self, event: BackgroundTaskDone) -> None:
+        self.query_one(ChatPanel).add_background_task(
+            event.agent_name, event.status, event.result, event.error, event.duration_s
+        )
+
     def on_session_title_generated(self, event: SessionTitleGenerated) -> None:
         self.query_one(StatusPanel).update_session_title(event.title)
+
+    def on_plan_state_changed(self, event: PlanStateChanged) -> None:
+        self.query_one(StatusPanel).update_plan(event.plan_name, event.tasks)
+
+    def on_notepad_changed(self, event: NotepadChanged) -> None:
+        self.query_one(StatusPanel).update_notepad(event.plan_name, event.content)
 
     # -- Actions ---------------------------------------------------------------
 
@@ -309,6 +330,8 @@ class SageTUIApp(App[None]):
 
     def _finish_turn(self) -> None:
         self.query_one(StatusPanel).clear_active_delegation()
+        self.query_one(StatusBar).set_active_category(None)  # clear category badge
+        self._refresh_plan_notepad()                          # catch-all refresh
         if self._agent:
             stats = self._agent.get_usage_stats()
             self.query_one(StatusPanel).update_stats(stats)
@@ -376,11 +399,39 @@ class SageTUIApp(App[None]):
         """Fire-and-forget background title generation."""
         self._title_task = asyncio.create_task(self._generate_session_title(context))
 
+    def _refresh_plan_notepad(self) -> None:
+        """Read the active plan and notepad from disk and post refresh messages."""
+        try:
+            from sage.planning.notepad import Notepad
+            from sage.planning.state import PlanStateManager
+
+            mgr = PlanStateManager()
+            plan_names = mgr.list_active()
+            if not plan_names:
+                self.query_one(StatusPanel).clear_plan()
+                return
+            plan = mgr.load(plan_names[0])
+            if plan is None:
+                self.query_one(StatusPanel).clear_plan()
+                return
+            tasks = [{"description": t.description, "status": t.status} for t in plan.tasks]
+            self.post_message(PlanStateChanged(plan_name=plan.plan_name, tasks=tasks))
+            try:
+                notepad = Notepad(plan.plan_name)
+                content = notepad.read_all()
+                if content.strip():
+                    self.post_message(NotepadChanged(plan_name=plan.plan_name, content=content))
+            except Exception:
+                pass  # Notepad is optional
+        except Exception:
+            logger.debug("Plan/notepad refresh failed", exc_info=True)
+
 
 # Re-export widget/message classes so existing imports from sage_tui.app keep working.
 __all__ = [
     "SageTUIApp",
     "AssistantEntry",
+    "BackgroundTaskEntry",
     "ChatPanel",
     "HistoryInput",
     "LogPanel",
