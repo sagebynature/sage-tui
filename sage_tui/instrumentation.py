@@ -63,7 +63,7 @@ def instrument_agent(agent: Agent, app: "SageTUIApp") -> None:
     agent.on(DelegationStarted, on_delegation_started)
 
 
-def _wire_interactive_permissions(agent: Agent, app: App) -> None:  # type: ignore[type-arg]
+def _wire_interactive_permissions(agent: Agent, app: App) -> None:
     """Replace ASK-policy permission handlers with interactive ones on *agent* and all subagents.
 
     This allows the TUI to prompt the user via a modal dialog when a tool
