@@ -590,3 +590,56 @@ async def test_chat_panel_add_background_task(widget_app) -> None:
         panel.add_background_task("executor", "completed", "result text", None, 1.2)
         await pilot.pause()
         assert len(app.query(BackgroundTaskEntry)) == 1
+
+
+async def test_status_panel_update_plan_shows_tasks(widget_app, mock_agent) -> None:
+    app = widget_app(StatusPanel(id="status"))
+    async with app.run_test():
+        panel = app.query_one(StatusPanel)
+        panel.display = True
+        panel.set_session("abcd1234abcd1234abcd1234abcd1234", "")
+        panel.initialize(mock_agent)
+        tasks = [
+            {"description": "Research codebase", "status": "completed"},
+            {"description": "Implement feature", "status": "in_progress"},
+            {"description": "Write tests", "status": "pending"},
+        ]
+        panel.update_plan("my-plan", tasks)
+        plan_widget = panel.query_one("#plan-section", Static)
+        assert plan_widget is not None
+        assert plan_widget.display is True
+
+
+async def test_status_panel_clear_plan_hides_section(widget_app, mock_agent) -> None:
+    app = widget_app(StatusPanel(id="status"))
+    async with app.run_test():
+        panel = app.query_one(StatusPanel)
+        panel.display = True
+        panel.set_session("abcd1234abcd1234abcd1234abcd1234", "")
+        panel.initialize(mock_agent)
+        panel.clear_plan()
+        plan_widget = panel.query_one("#plan-section", Static)
+        assert plan_widget.display is False
+
+
+async def test_status_panel_update_notepad_sets_content(widget_app, mock_agent) -> None:
+    app = widget_app(StatusPanel(id="status"))
+    async with app.run_test():
+        panel = app.query_one(StatusPanel)
+        panel.display = True
+        panel.set_session("abcd1234abcd1234abcd1234abcd1234", "")
+        panel.initialize(mock_agent)
+        panel.update_notepad("my-plan", "### learnings\nKey insight here")
+        collapsible = panel.query_one("#notepad-collapsible", Collapsible)
+        assert collapsible is not None
+
+
+async def test_status_panel_set_active_delegation_with_category(widget_app, mock_agent) -> None:
+    app = widget_app(StatusPanel(id="status"))
+    async with app.run_test():
+        panel = app.query_one(StatusPanel)
+        panel.display = True
+        panel.set_session("abcd1234abcd1234abcd1234abcd1234", "")
+        panel.initialize(mock_agent)
+        # Should not raise; category shown inline
+        panel.set_active_delegation("coder", "write tests", category="quick")

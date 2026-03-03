@@ -382,7 +382,12 @@ class StatusPanel(Widget):
             title="SKILLS", collapsed=True, id="skills-collapsible", classes="section"
         ):
             yield Static("", id="skills-content")
-        yield Static("", id="active-section")
+        yield Static("", id="active-section", classes="section")
+        yield Static("", id="plan-section", classes="section")
+        with Collapsible(
+            title="NOTEPAD", collapsed=True, id="notepad-collapsible", classes="section"
+        ):
+            yield Markdown("", id="notepad-content")
 
     def set_session(self, session_id: str, title: str) -> None:
         """Set session identity. Call before initialize()."""
@@ -427,6 +432,7 @@ class StatusPanel(Widget):
         self._render_session()
         self.update_stats({})
         self.clear_active_delegation()
+        self.clear_plan()
 
     def update_stats(self, stats: dict[str, Any]) -> None:
         """Refresh context, token breakdown, and cost sections."""
@@ -471,16 +477,47 @@ class StatusPanel(Widget):
             tokens_lines.append(f"  [dim]reasoning[/dim]  {format_tokens(reasoning)}")
         self.query_one("#tokens-section", Static).update("\n".join(tokens_lines))
 
-    def set_active_delegation(self, target: str, task: str) -> None:
+    def set_active_delegation(self, target: str, task: str, category: str | None = None) -> None:
         preview = task[:45] + "\u2026" if len(task) > 45 else task
+        cat_badge = f"  [cyan][{category}][/cyan]" if category else ""
         self.query_one("#active-section", Static).update(
-            f"[bold]ACTIVE AGENTS[/bold]\n  [yellow]\u21b3[/yellow] {target}  [dim]{preview!r}[/dim]"
+            f"[bold]ACTIVE AGENTS[/bold]\n"
+            f"  [yellow]\u21b3[/yellow] {target}{cat_badge}  [dim]{preview!r}[/dim]"
         )
 
     def clear_active_delegation(self) -> None:
         self.query_one("#active-section", Static).update(
             "[bold]ACTIVE AGENTS[/bold]\n  [dim](idle)[/dim]"
         )
+
+    def update_plan(self, plan_name: str, tasks: list[dict[str, Any]]) -> None:
+        """Render the plan task list in the PLAN section."""
+        _STATUS_ICONS: dict[str, tuple[str, str]] = {
+            "completed": ("[green]\u2713[/green]", "green"),
+            "in_progress": ("[yellow]\u25cf[/yellow]", "yellow"),
+            "pending": ("[dim]\u25cb[/dim]", "dim"),
+            "failed": ("[red]\u2717[/red]", "red"),
+        }
+        lines = [f"[bold]PLAN[/bold]  [dim]{plan_name}[/dim]"]
+        for t in tasks:
+            icon, color = _STATUS_ICONS.get(t["status"], ("[dim]\u25cb[/dim]", "dim"))
+            desc = t["description"]
+            if len(desc) > 30:
+                desc = desc[:27] + "\u2026"
+            lines.append(f"  {icon} [{color}]{desc}[/{color}]")
+        widget = self.query_one("#plan-section", Static)
+        widget.update("\n".join(lines))
+        widget.display = True
+
+    def clear_plan(self) -> None:
+        """Hide the PLAN section when no active plans exist."""
+        self.query_one("#plan-section", Static).display = False
+
+    def update_notepad(self, plan_name: str, content: str) -> None:
+        """Update the NOTEPAD collapsible with the latest notepad content."""
+        collapsible = self.query_one("#notepad-collapsible", Collapsible)
+        collapsible.title = f"NOTEPAD  [dim]({plan_name})[/dim]"
+        self.query_one("#notepad-content", Markdown).update(content)
 
 
 class LogPanel(Widget):
