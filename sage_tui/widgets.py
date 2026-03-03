@@ -354,6 +354,11 @@ class ChatPanel(Widget):
         """Schedule a scroll-to-bottom respecting the pin state."""
         self.call_after_refresh(self._maybe_scroll_end)
 
+    def force_scroll_end(self) -> None:
+        """Force scroll to bottom unconditionally and re-pin auto-scroll."""
+        self._auto_scroll = True
+        self.call_after_refresh(self._maybe_scroll_end)
+
     def clear_entries(self) -> None:
         self.query_one("#chat-scroll", VerticalScroll).remove_children()
         self._auto_scroll = True

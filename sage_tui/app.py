@@ -274,6 +274,7 @@ class SageTUIApp(App[None]):
         entry.set_text(f"[Error] {event.error}")
         self._current_response = None
         self._set_status("Error")
+        self.query_one(ChatPanel).force_scroll_end()
         self._re_enable_input()
 
     def on_background_task_done(self, event: BackgroundTaskDone) -> None:
@@ -348,6 +349,7 @@ class SageTUIApp(App[None]):
                 self._schedule_title_generation("")  # re-derive from history
             elif not self._session_title:
                 self._schedule_title_generation("")  # generate from first user message
+        self.query_one(ChatPanel).force_scroll_end()
         self._re_enable_input()
 
     def _re_enable_input(self) -> None:
