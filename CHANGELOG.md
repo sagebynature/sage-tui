@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.1.1 (2026-03-03)
+
+### Bug Fixes
+
+- **ci**: Skip workflow re-run triggered by PSR version bump commit
+  ([`b9e1537`](https://github.com/sagebynature/sage-tui/commit/b9e153735c091cf43f820e44d8e5cf1b3d49e9fb))
+
+
 ## v1.1.0 (2026-03-03)
 
 ### Bug Fixes
