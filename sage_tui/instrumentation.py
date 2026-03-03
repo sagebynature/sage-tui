@@ -11,6 +11,7 @@ from textual.message import Message
 from sage.agent import Agent
 
 from sage_tui.messages import (
+    BackgroundTaskDone,
     DelegationEventStarted,
     StreamChunkReceived,
     ToolCallCompleted,
@@ -34,6 +35,7 @@ def instrument_agent(agent: Agent, app: "SageTUIApp") -> None:
     hook so the :meth:`~SageTUIApp._agent_stream` loop can stay clean.
     """
     from sage.events import (
+        BackgroundTaskCompleted,
         DelegationStarted,
         LLMStreamDelta,
         LLMTurnStarted,
@@ -54,13 +56,32 @@ def instrument_agent(agent: Agent, app: "SageTUIApp") -> None:
         app.post_message(TurnStarted(e.turn, e.model))
 
     async def on_delegation_started(e: DelegationStarted) -> None:
-        app.post_message(DelegationEventStarted(e.target, e.task))
+        category = getattr(e, "category", None)
+        app.post_message(DelegationEventStarted(e.target, e.task, category=category))
+
+    async def on_background_task_completed(e: BackgroundTaskCompleted) -> None:
+        info = agent._bg_manager.get(e.task_id)
+        if info is not None and info.completed_at is not None:
+            duration_s = info.completed_at - info.created_at
+        else:
+            duration_s = 0.0
+        app.post_message(
+            BackgroundTaskDone(
+                task_id=e.task_id,
+                agent_name=e.agent_name,
+                status=e.status,
+                result=e.result,
+                error=e.error,
+                duration_s=duration_s,
+            )
+        )
 
     agent.on(ToolStarted, on_tool_started)
     agent.on(ToolCompleted, on_tool_completed)
     agent.on(LLMStreamDelta, on_stream_delta)
     agent.on(LLMTurnStarted, on_turn_started)
     agent.on(DelegationStarted, on_delegation_started)
+    agent.on(BackgroundTaskCompleted, on_background_task_completed)
 
 
 def _wire_interactive_permissions(agent: Agent, app: App) -> None:
