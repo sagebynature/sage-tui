@@ -643,3 +643,27 @@ async def test_status_panel_set_active_delegation_with_category(widget_app, mock
         panel.initialize(mock_agent)
         # Should not raise; category shown inline
         panel.set_active_delegation("coder", "write tests", category="quick")
+
+
+async def test_status_bar_shows_category_when_set(widget_app) -> None:
+    from sage_tui.widgets import StatusBar
+
+    app = widget_app(StatusBar(id="bar"))
+    async with app.run_test() as pilot:
+        bar = app.query_one(StatusBar)
+        bar.set_state("Streaming\u2026", "sage", "gpt-4o", False, streaming_mode=True)
+        bar.set_active_category("deep")
+        await pilot.pause()
+        assert bar._active_category == "deep"
+
+
+async def test_status_bar_clears_category(widget_app) -> None:
+    from sage_tui.widgets import StatusBar
+
+    app = widget_app(StatusBar(id="bar"))
+    async with app.run_test() as pilot:
+        bar = app.query_one(StatusBar)
+        bar.set_active_category("deep")
+        bar.set_active_category(None)
+        await pilot.pause()
+        assert bar._active_category is None

@@ -575,6 +575,7 @@ class StatusBar(Static):
     _model: str = ""
     _has_subagents: bool = False
     _streaming_mode: bool = False
+    _active_category: str | None = None
 
     def update_token_usage(self, token_usage: int, context_window_limit: int | None) -> None:
         self._token_usage = token_usage
@@ -600,6 +601,11 @@ class StatusBar(Static):
         self._streaming_mode = streaming_mode
         self._refresh()
 
+    def set_active_category(self, category: str | None) -> None:
+        """Set or clear the active delegation category badge."""
+        self._active_category = category
+        self._refresh()
+
     def _refresh(self) -> None:
         colour = {
             "Ready": "green",
@@ -610,6 +616,11 @@ class StatusBar(Static):
         hint = "  [dim]ctrl+o: orchestrate[/dim]" if self._has_subagents else ""
         stream_badge = (
             " [cyan]\u25c9 stream[/cyan]" if self._streaming_mode else " [dim]\u25cb batch[/dim]"
+        )
+        cat_badge = (
+            f" [cyan dim][{self._active_category}][/cyan dim]"
+            if self._active_category
+            else ""
         )
 
         # Token usage display
@@ -633,7 +644,7 @@ class StatusBar(Static):
 
         self.update(
             f"[{colour}]\u25cf {self._state}[/{colour}]  [bold]{self._agent_name}[/bold]"
-            f" ([dim]{self._model}[/dim]){stream_badge}    "
+            f" ([dim]{self._model}[/dim]){stream_badge}{cat_badge}    "
             f"[{token_colour}]{token_str}[/{token_colour}]{cost_str}    "
             f"[dim]ctrl+b: status  ctrl+n: new session  ctrl+s: stream  ctrl+l: logs  ctrl+q: quit[/dim]{hint}"
         )
