@@ -13,7 +13,7 @@ requires-python = ">=3.10"
 readme = "README.md"
 license = { file = "LICENSE" }
 dependencies = [
-    "sage-agent>=1.3.0",
+    "sage-agent>=1.4.0",
     "textual>=0.50",
     "click>=8.0",
     "python-dotenv>=1.0",
