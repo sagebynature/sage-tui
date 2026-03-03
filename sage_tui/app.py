@@ -244,7 +244,7 @@ class SageTUIApp(App[None]):
         self.query_one(StatusPanel).set_active_delegation(
             event.target, event.task, category=event.category
         )
-        if event.category:
+        if event.category is not None:
             self.query_one(StatusBar).set_active_category(event.category)
 
     def on_stream_chunk_received(self, event: StreamChunkReceived) -> None:
